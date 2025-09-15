@@ -3,6 +3,8 @@
 import re
 import time
 from datetime import datetime
+import random
+
 
 # -------------------------
 # Expresiones regulares
@@ -60,64 +62,68 @@ CONTACTO_RE = r"\b(?:contacto|comunica(?:r(?:se)?)?|hablar (?:con|a)? (?:alguien
 EXTRA_RE = r"\b(escrib(e|ir))\b"
 
 regex_menu = {
-    r"hawaiana": "Hawaiana Pizza de jamón, piña y extra queso 100% Mozzarella.",
-    r"super\s*pe+per?on+i": "Super Pepperoni Pizza con extra porción de pepperoni y extra queso.",
-    r"vegetarian[ao]": "Pizza con vegetales frescos: champiñones, cebolla, pimiento verde, jitomate y aceitunas negras",
-    r"mexican[ao]": "Pizza con chorizo, carne de res, cebolla, jalapeños picositos y salsa de tomate con frijoles.",
-    r"caribeñ[ao]": "Pizza con piña y chile molido",
-    r"the\s*works": "The Works Pizza de pepperoni, salchicha italiana, jamón, champiñones, cebolla, pimiento verde y aceitunas negras",
-    r"papas?\s*favorite": "Papas Favorite Pizza con mezcla de 6 quesos (Mozzarella, Parmesano, Romano, Asiago, Fontina, Provolone), pepperoni, salchicha de cerdo",
-    r"all\s*the\s*meats": "All The Meats Pizza con carnes frías: pepperoni, salchicha de puerco, carne de res, jamón y tocino",
-    r"pe+per?on+i\s*xl\s*masa\s*delgada": "Nuestra pizza Pepperoni XL es extra grande en sabor.",
-    r"arma\s*tu\s*pizza": "Elige el tamaño, la masa y luego añade tus ingredientes favoritos y nosotros la haremos por ti.",
-    r"mitad\s*y\s*mitad": "Te pasa que a veces no puedes decidir? Pues esta es definitivamente para ti. Dos sabores en una sola pizza, perfecta para cuando tienes antojo de dos sabores.",
-    r"tuscan\s*six\s*cheese": "Tuscan Six Cheese Pizza con mezcla de 6 quesos: Mozzarella, Parmesano, Romano, Asiago, Fontina, Provolone y hierbas italianas.",
-    # Complementos
+    # --- PIZZAS ---
+    r"hawaiana": {"descrip": "Hawaiana Pizza de jamón, piña y extra queso 100% Mozzarella.", "precio": 244},
+    r"super\s*pe+per?on+i": {"descrip": "Super Pepperoni Pizza con extra porción de pepperoni y extra queso.", "precio": 244},
+    r"vegetarian[ao]": {"descrip": "Pizza con vegetales frescos: champiñones, cebolla, pimiento verde, jitomate y aceitunas negras", "precio": 244},
+    r"mexican[ao]": {"descrip": "Pizza con chorizo, carne de res, cebolla, jalapeños picositos y salsa de tomate con frijoles.", "precio": 244},
+    r"caribeñ[ao]": {"descrip": "Pizza con piña y chile molido", "precio": 244},
+    r"the\s*works": {"descrip": "The Works Pizza de pepperoni, salchicha italiana, jamón, champiñones, cebolla, pimiento verde y aceitunas negras", "precio": 284},
+    r"papas?\s*favorite": {"desc": "Papas Favorite Pizza con mezcla de 6 quesos (Mozzarella, Parmesano, Romano, Asiago, Fontina, Provolone), pepperoni, salchicha de cerdo", "precio": 284},
+    r"all\s*the\s*meats": {"descrip": "All The Meats Pizza con carnes frías: pepperoni, salchicha de puerco, carne de res, jamón y tocino", "precio": 284},
+    r"pe+per?on+i\s*xl\s*masa\s*delgada": {"descrip": "Nuestra pizza Pepperoni XL es extra grande en sabor.", "precio": 324},
+    r"arma\s*tu\s*pizza": {"descrip": "Elige el tamaño, la masa y luego añade tus ingredientes favoritos y nosotros la haremos por ti.", "precio": 129},
+    r"mitad\s*y\s*mitad": {"descrip": "Dos sabores en una sola pizza, perfecta para cuando tienes antojo de dos sabores.", "precio": 179},
+    r"tuscan\s*six\s*cheese": {"descrip": "Tuscan Six Cheese Pizza con mezcla de 6 quesos: Mozzarella, Parmesano, Romano, Asiago, Fontina, Provolone y hierbas italianas.", "precio": 189},
 
-    r"mini\s*cheesesticks": "Mini Cheesesticks con queso fundido y masa doradita.",
-    r"pepperoni\s*rolls": "Pepperoni Rolls rellenos de pepperoni y queso mozzarella.",
-    r"potato\s*wedges": "Papas gajo sazonadas y doradas al horno.",
-    r"calzone\s*jam[oó]n\s*y\s*piñ[ae]": "Calzone relleno de jamón y piña con queso derretido.",
-    r"calzone\s*jam[oó]n\s*y\s*champ[ií]ñones": "Calzone con jamón y champiñones frescos.",
-    r"calzone\s*pe+per?on+i": "Calzone relleno de pepperoni y queso fundido.",
+    # --- COMPLEMENTOS ---
+    r"mini\s*cheesesticks": {"descrip": "Mini Cheesesticks con queso fundido y masa doradita.", "precio": 89},
+    r"pepperoni\s*rolls": {"descrip": "Pepperoni Rolls rellenos de pepperoni y queso mozzarella.", "precio": 89},
+    r"potato\s*wedges": {"descrip": "Papas gajo sazonadas y doradas al horno.", "precio": 89},
+    r"calzone\s*jam[oó]n\s*y\s*piñ[ae]": {"descrip": "Calzone relleno de jamón y piña con queso derretido.", "precio": 99},
+    r"calzone\s*jam[oó]n\s*y\s*champ[ií]ñones": {"descrip": "Calzone con jamón y champiñones frescos.", "precio": 99},
+    r"calzone\s*pe+per?on+i": {"descrip": "Calzone relleno de pepperoni y queso fundido.", "precio": 99},
 
-    # postres
-    r"snickers\s*rolls": "Deliciosos Snickers® Rolls con relleno cremoso.",
-    r"milky\s*way\s*rolls": "Milky Way® Rolls rellenos de chocolate y caramelo.",
-    r"chocoavellana\s*pay": "Pay relleno de chocoavellana y cubierta de chocolate.",
-    r"chocoavellana\s*snickers": "Postre de chocoavellana con Snickers®.",
-    r"chocoavellana\s*milky\s*way": "Postre de chocoavellana con Milky Way®.",
-    r"chocoavellana\s*m&m'?s": "Postre de chocoavellana con M&M'S®.",
+    # --- POSTRES ---
+    r"snickers\s*rolls": {"descrip": "Deliciosos Snickers® Rolls con relleno cremoso.", "precio": 89},
+    r"milky\s*way\s*rolls": {"descrip": "Milky Way® Rolls rellenos de chocolate y caramelo.", "precio": 89},
+    r"chocoavellana\s*pay": {"descrip": "Pay relleno de chocoavellana y cubierta de chocolate.", "precio": 79},
+    r"chocoavellana\s*snickers": {"descrip": "Postre de chocoavellana con Snickers®.", "precio": 89},
+    r"chocoavellana\s*milky\s*way": {"descrip": "Postre de chocoavellana con Milky Way®.", "precio": 89},
+    r"chocoavellana\s*m&m'?s": {"descrip": "Postre de chocoavellana con M&M'S®.", "precio": 89},
 
-    # bebidas
-    r"coca\s*cola\s*2l?t": "Coca Cola 2lt bien fría.",
-    r"coca\s*cola\s*light\s*2l?t": "Coca Cola Light 2lt para los que prefieren menos calorías.",
-    r"sidral\s*2l?t": "Sidral 2lt refrescante y dulce.",
-    r"fanta\s*2l?t": "Fanta Naranja 2lt burbujeante.",
-    r"sprite\s*2l?t": "Sprite 2lt sabor limón.",
-    r"fresca\s*2l?t": "Fresca 2lt sabor toronja.",
-    r"coca\s*cola\s*lata\s*355ml": "Coca Cola en lata 355ml.",
-    r"coca\s*cola\s*sin\s*az[uú]car\s*lata\s*355ml": "Coca Cola sin azúcar en lata 355ml.",
-    r"coca\s*cola\s*light\s*lata\s*355ml": "Coca Cola Light en lata 355ml.",
-    r"sidral\s*mundet\s*lata\s*355ml": "Sidral Mundet en lata 355ml.",
-    r"fanta\s*naranja\s*lata\s*355ml": "Fanta Naranja en lata 355ml.",
-    r"sprite\s*lata\s*355ml": "Sprite en lata 355ml.",
-    r"fresca\s*toronja\s*lata\s*355ml": "Fresca Toronja en lata 355ml.",
-    r"delaware\s*punch\s*lata\s*355ml": "Delaware Punch en lata 355ml.",
-    r"fuze\s*tea\s*verde\s*lim[oó]n\s*600ml": "Fuze Tea verde limón 600ml.",
-    r"fuze\s*tea\s*negro\s*lim[oó]n\s*600ml": "Fuze Tea negro limón 600ml.",
-    r"fuze\s*tea\s*negro\s*durazno\s*600ml": "Fuze Tea negro durazno 600ml.",
-    r"agua\s*ciel\s*600ml": "Agua Ciel natural 600ml.",
-    r"agua\s*ciel\s*jam[aá]ica\s*600ml": "Agua Ciel Jamaica 600ml.",
-    r"agua\s*ciel\s*lim[oó]n\s*600ml": "Agua Ciel Limón 600ml.",
+    # --- BEBIDAS ---
+    r"coca\s*cola\s*2l?t": {"descrip": "Coca Cola 2lt bien fría.", "precio": 55},
+    r"coca\s*cola\s*light\s*2l?t": {"descrip": "Coca Cola Light 2lt para los que prefieren menos calorías.", "precio": 55},
+    r"sidral\s*2l?t": {"descrip": "Sidral 2lt refrescante y dulce.", "precio": 55},
+    r"fanta\s*2l?t": {"descrip": "Fanta Naranja 2lt burbujeante.", "precio": 55},
+    r"sprite\s*2l?t": {"descrip": "Sprite 2lt sabor limón.", "precio": 55},
+    r"fresca\s*2l?t": {"descrip": "Fresca 2lt sabor toronja.", "precio": 55},
+    r"coca\s*cola\s*lata\s*355ml": {"descrip": "Coca Cola en lata 355ml.", "precio": 35},
+    r"coca\s*cola\s*sin\s*az[uú]car\s*lata\s*355ml": {"descrip": "Coca Cola sin azúcar en lata 355ml.", "precio": 35},
+    r"coca\s*cola\s*light\s*lata\s*355ml": {"descrip": "Coca Cola Light en lata 355ml.", "precio": 35},
+    r"sidral\s*mundet\s*lata\s*355ml": {"descrip": "Sidral Mundet en lata 355ml.", "precio": 35},
+    r"fanta\s*naranja\s*lata\s*355ml": {"descrip": "Fanta Naranja en lata 355ml.", "precio": 35},
+    r"sprite\s*lata\s*355ml": {"descrip": "Sprite en lata 355ml.", "precio": 35},
+    r"fresca\s*toronja\s*lata\s*355ml": {"descrip": "Fresca Toronja en lata 355ml.", "precio": 35},
+    r"delaware\s*punch\s*lata\s*355ml": {"descrip": "Delaware Punch en lata 355ml.", "precio": 35},
+    r"fuze\s*tea\s*verde\s*lim[oó]n\s*600ml": {"descrip": "Fuze Tea verde limón 600ml.", "precio": 38},
+    r"fuze\s*tea\s*negro\s*lim[oó]n\s*600ml": {"descrip": "Fuze Tea negro limón 600ml.", "precio": 38},
+    r"fuze\s*tea\s*negro\s*durazno\s*600ml": {"descrip": "Fuze Tea negro durazno 600ml.", "precio": 38},
+    r"agua\s*ciel\s*600ml": {"descrip": "Agua Ciel natural 600ml.", "precio": 38},
+    r"agua\s*ciel\s*jam[aá]ica\s*600ml": {"descrip": "Agua Ciel Jamaica 600ml.", "precio": 38},
+    r"agua\s*ciel\s*lim[oó]n\s*600ml": {"descrip": "Agua Ciel Limón 600ml.", "precio": 38},
 
-    # extra
-    r"dip\s*salsa\s*bbq": "Dip Salsa BBQ para acompañar tu pizza.",
-    r"dip\s*salsa\s*de\s*ajo": "Dip Salsa de Ajo cremosa.",
-    r"peperoncini": "Peperoncini picantes para los valientes."
+    # --- EXTRAS ---
+    r"dip\s*salsa\s*bbq": {"descrip": "Dip Salsa BBQ para acompañar tu pizza.", "precio": 18},
+    r"dip\s*salsa\s*de\s*ajo": {"descrip": "Dip Salsa de Ajo cremosa.", "precio": 18},
+    r"peperoncini": {"descrip": "Peperoncini picantes para los valientes.", "precio": 18}
 }
 
-
+def generarnumpedido():
+    fecha = datetime.now().strftime("%Y%m%d%H%M%S")
+    aleatorio = random.randint(10, 99)
+    return f"PJ-{fecha}-{aleatorio}"
 
 def main():
     state = 0
@@ -181,37 +187,64 @@ def main():
             else:
                 state = 0
 
-        if state == 2: #Aun sigo en esta :)
+        if state == 2:
             print("Muchas gracias por ordenar con nosotros \n")
-            respuesta=input("Dime si empezamos con tu pedido o puedo mostrarte nuestro menu \n")
+            respuesta = input("Dime si empezamos con tu pedido o puedo mostrarte nuestro menú \n")
 
-            if re.search(MENU_RE, respuesta,re.IGNORECASE):
+            if re.search(MENU_RE, respuesta, re.IGNORECASE):
                 state = 6
+
             elif re.search(PEDIDO_RE, respuesta, re.IGNORECASE):
-                print("Perfecto, empezemos con las pizzas")
-                pedido_pizza=input("Que pizza te gustaria para ordenar?")
+                pedido_total = []  # Guardaremos los artículos en este arreglo
+                total_pago = 0
+                print("Perfecto, empecemos con tu pedido de pizzas")
 
-                if re.search(pedido_pizza,NEGACION_RE,re.IGNORECASE):
-                    pedido_extra= input("Oh, Dime que te gustaria ordenar de nuestra area de bebidas y postres")
-                masdeuna=input("Seria todo de nuestra area de pizzas?, puedo ofrecerte nuestras promociones\n"
-                                "Nuestras promociones del momento son:\n"
-                                "- Especialidades a $159.\n"
-                                "- Pizza especial con un postre de $49.\n"
-                                "- Pizza signature con un postre de $49.\n"
-                                "- Pizza especial con un regresco de 2L de $40.\n"
-                                "- Pizza signature con un refresco de 2L de $40.\n"
-                                "- Papa Combo $195.\n"
-                                "- Star Pizza $239.\n"
-                                "- Combo404 $404.\n"
-                                "- Pizza en forma de corazón a $219\n"
-                                "- Paquete corazón a $299\n\n"
-                                "¿Desea ordenar alguna promoción? ")
+                while True:
+                    pedido_linea = input(
+                        "Escribe tu pedido (puedes incluir cantidad y varios productos'): ").strip()
 
-                if re.search(masdeuna,NEGACION_RE,re.IGNORECASE):
-                    pedido_bebidadopostre=input("Entonces continuemos, te muestro nuestra seccion de bebidas y postres o seria todo?\n")
-                    if re.search(pedido_bebidadopostre,FINALIZAR_RE, re.IGNORECASE):
-                        print("Perfecto, entonces te muestro tu pedido, dime si esta todo correcto: \n")
-                        print(f"Pedido: Pizza:{pedido_pizza}")
+                    if re.search(SALIR_RE, pedido_linea, re.IGNORECASE) or re.search(NEGACION_RE, pedido_linea,
+                                                                                     re.IGNORECASE):
+                        break
+
+                    coincidencias = re.findall(r"(\d*)\s*([a-zA-Z0-9\sóñ&']+)", pedido_linea)
+                    for cantidad_str, nombre_producto in coincidencias:
+                        cantidad = int(cantidad_str) if cantidad_str.isdigit() else 1
+                        nombre_producto = nombre_producto.strip()
+
+                        # Buscar el producto en el menú
+                        encontrada = None
+                        for patron, info in regex_menu.items():
+                            if re.search(patron, nombre_producto, re.IGNORECASE):
+                                encontrada = info
+                                break
+
+                        if encontrada:
+                            subtotal = encontrada['precio'] * cantidad
+                            print(f"Agregado al pedido: {cantidad} x {nombre_producto.title()} - ${subtotal}")
+                            pedido_total.append((nombre_producto.title(), cantidad, encontrada['precio']))
+                            total_pago += subtotal
+                        else:
+                            print(f"No entendí el producto '{nombre_producto}', intenta de nuevo.")
+                            break
+
+                    # Preguntar si desea agregar más
+                    continuar = input("¿Deseas agregar más productos? (sí/no): ").strip()
+                    if re.search(NEGACION_RE, continuar, re.IGNORECASE):
+                        break
+
+                print("\nTu pedido completo es:")
+                for item, cant, precio in pedido_total:
+                    print(f"- {cant} x {item} - ${precio * cant}")
+
+                print(f"\nTOTAL: ${total_pago}")
+
+                # Generar número de pedido
+                numero_pedido = generarnumpedido()
+                print(f"\nTu numero de pedido es: {numero_pedido}")
+                print("Gracias por tu compra, Serás redirigido al area de cobro\n")
+                state = 8
+
          #AYUDA
         if state == 12:
             print("\n=== Ayuda Papa John's ===")
@@ -345,30 +378,33 @@ def main():
                   "   - Dip Salsa BBQ\n"
                   "   - Dip Salsa de Ajo\n"
                   "   - Peperoncini\n"
+
                   "Escribe el nombre de la pizza que deseas, o 'salir' para terminar.")
 
             while True:  # Mantenerse en el menú hasta que elija algo o salga
                 opcion_pizza = input("Tu elección: ").strip()
 
-                #Si el usuario llega a querer salir del menu
+                # Si el usuario llega a querer salir del menu
                 if re.search(SALIR_RE, opcion_pizza, re.IGNORECASE):
                     state = 11
                     break
 
                 # Buscar la pizza con las expresiones regulares
                 encontrada = None
-                for patron, descripcion in regex_menu.items():
+                for patron, info in regex_menu.items():
                     if re.search(patron, opcion_pizza, re.IGNORECASE):
-                        encontrada = (patron, descripcion)
+                        encontrada = info
                         break
 
                 if encontrada:
-                    print(f"La pizza: {opcion_pizza.title()}")
-                    print(f"{encontrada[1]}")
-                    pedido= input("Te gustaria pasar a relizar tu pedido o te si gustas puedes seguir navegando por el menu \n")
-                    if re.search(MENU_RE,pedido,re.IGNORECASE):
+                    print(f"{opcion_pizza.title()}")
+                    print(f"Descripción: {encontrada['descrip']}")
+                    print(f"Precio: ${encontrada['precio']}")
+                    pedido = input(
+                        "Te gustaria pasar a relizar tu pedido o te si gustas puedes seguir navegando por el menu \n")
+                    if re.search(MENU_RE, pedido, re.IGNORECASE):
                         break
-                    elif re.search(PEDIDO_RE,pedido,re.IGNORECASE):
+                    elif re.search(PEDIDO_RE, pedido, re.IGNORECASE):
                         state = 2  # Redireccionamos al estado de pedido
                         break
 
