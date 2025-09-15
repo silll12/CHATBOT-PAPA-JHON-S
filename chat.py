@@ -212,7 +212,52 @@ def main():
                     if re.search(pedido_bebidadopostre,FINALIZAR_RE, re.IGNORECASE):
                         print("Perfecto, entonces te muestro tu pedido, dime si esta todo correcto: \n")
                         print(f"Pedido: Pizza:{pedido_pizza}")
+         #AYUDA
+        if state == 12:
+            print("\n=== Ayuda Papa John's ===")
+            print("Puedes pedirme información sobre:")
+            print("- Promociones")
+            print("- Pedidos")
+            print("- Sucursales")
+            print("- Horarios")
+            print("- Menú")
+            print("- Estado de pedido")
+            print("- Contacto")
+            print("\nEjemplo de consulta: 'Quiero hacer un pedido' o 'Mostrar promociones'")
 
+            input("\nPresiona Enter para volver al menú principal...")
+            state = 0  # Regresamos al menú principal
+
+        #CONTACTO
+        if state == 13:
+            while True:
+                print("\n=== Soporte Papa John's ===")
+                print("1) Teléfonos y correo")
+                print("2) Queja o sugerencia")
+                print("3) Rastreo de pedido (simulado)")
+                print("Escribe 'menu' para volver al inicio.")
+
+                op = input("Elige una opción: ").strip().lower()
+
+                if op == "1":
+                     print("📞 800 111 11 11  |  ✉️ soporte@papajohns.com")
+                elif op == "2":
+                    detalle = input("Cuéntanos tu queja o sugerencia: ")
+                    print("Gracias, la canalizaremos a nuestro equipo.")
+                elif op == "3":
+                    pid = input("Ingresa tu ID de pedido: ")
+                    print(f"Pedido {pid}: en preparación (ejemplo).")
+                elif op == "menu":
+                    print("Regresando al menú principal.")
+                    state = 0
+                    break
+                elif re.search(SALIR_RE, op, re.IGNORECASE):
+                    print("¡Hasta luego!")
+                    state = 11
+                    break
+                else:
+                    print("Opción no válida. Intenta de nuevo.")
+    
         #Horarios de las sucursales
         if state == 5:
             print("¡Claro! El horario de todas nuestras sucursales es el siguiente: \n"
