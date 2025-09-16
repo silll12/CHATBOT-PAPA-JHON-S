@@ -117,7 +117,14 @@ regex_menu = {
     # --- EXTRAS ---
     r"dip\s*salsa\s*bbq": {"descrip": "Dip Salsa BBQ para acompañar tu pizza.", "precio": 18},
     r"dip\s*salsa\s*de\s*ajo": {"descrip": "Dip Salsa de Ajo cremosa.", "precio": 18},
-    r"peperoncini": {"descrip": "Peperoncini picantes para los valientes.", "precio": 18}
+    r"peperoncini": {"descrip": "Peperoncini picantes para los valientes.", "precio": 18},
+
+    #---  Promociones --
+
+    r"papa\s*combo": {"descrip": "Pizza Grande de 1 ingrediente a elegir entre Pepperoni o Queso en masa delgada de 14” más un complemento a elegir entre Mini CheeseStick, Pepperoni Rolls o Chocoavellana Pay.\n"
+    "Promoción Valida en Ciudad de México y Estado de México. No aplica con otras promociones , cupones, descuentos ni productos no especificados", "precio": 195},
+    r"star\s*pizza": {"descrip": "Pizza mediana de masa tradicional en forma de estrella con orilla rellena de queso de uno o dos ingredientes a elegir", "precio": 239},
+    r"combo404": {"descrip": "Dos pizzas de especialidad masa delgada: Súper Pepperoni, Hawaiana, Mexicana, Tuscan Six Cheese, Vegetariana o Caribeña más un refresco de 2L: Coca Cola, Coca Light, Fanta, Sidral Mundet o Sprite", "precio": 404},
 }
 
 def generarnumpedido():
@@ -169,16 +176,9 @@ def main():
         if state == 1:
             opcion = input(
                 " Nuestras promociones del momento son:\n"
-                "- Especialidades a $159.\n"
-                "- Pizza especial con un postre de $49.\n"
-                "- Pizza signature con un postre de $49.\n"
-                "- Pizza especial con un regresco de 2L de $40.\n"
-                "- Pizza signature con un refresco de 2L de $40.\n"
                 "- Papa Combo $195.\n"
                 "- Star Pizza $239.\n"
                 "- Combo404 $404.\n"
-                "- Pizza en forma de corazón a $219\n"
-                "- Paquete corazón a $299\n\n"
                 "¿Desea ordenar alguna promoción? "
             )
             time.sleep(0.3)
@@ -220,10 +220,45 @@ def main():
                                 break
 
                         if encontrada:
-                            subtotal = encontrada['precio'] * cantidad
-                            print(f"Agregado al pedido: {cantidad} x {nombre_producto.title()} - ${subtotal}")
-                            pedido_total.append((nombre_producto.title(), cantidad, encontrada['precio']))
-                            total_pago += subtotal
+                            # Si es Combo404, pedimos detalles de pizza y refresco
+                            if re.search(r"combo404", nombre_producto, re.IGNORECASE):
+                                print("Elegiste Combo404, incluye 1 pizza y 1 refresco de 2L")
+
+                                # Elegir pizza
+                                pizza_elegida = input("¿Qué pizza deseas para tu Combo404?: ").strip()
+                                pizza_valida = None
+                                for patron, info in regex_menu.items():
+                                    if re.search(patron, pizza_elegida, re.IGNORECASE) and "Pizza" in info['descrip']:
+                                        pizza_valida = info
+                                        break
+                                if not pizza_valida:
+                                    print("No entendí la pizza, se asignará Hawaiana por defecto.")
+                                    pizza_valida = regex_menu[r"hawaiana"]
+
+                                # Elegir refresco
+                                refresco_elegido = input("¿Qué refresco de 2L deseas?: ").strip()
+                                refresco_valido = None
+                                for patron, info in regex_menu.items():
+                                    if re.search(patron, refresco_elegido, re.IGNORECASE) and "2lt" in info[
+                                        'desc'].lower():
+                                        refresco_valido = info
+                                        break
+                                if not refresco_valido:
+                                    print("No entendí el refresco, se asignará Coca Cola 2L por defecto.")
+                                    refresco_valido = regex_menu[r"coca\s*cola\s*2l?t"]
+
+                                # Agregar combo al pedido
+                                subtotal = encontrada['precio']
+                                pedido_total.append((f"Combo404: {pizza_elegida} + {refresco_elegido}", 1, subtotal))
+                                total_pago += subtotal
+                                print(f"Agregado Combo404 con {pizza_elegida} y {refresco_elegido} - ${subtotal}")
+
+                            else:
+                                # Producto normal
+                                subtotal = encontrada['precio'] * cantidad
+                                print(f"Agregado al pedido: {cantidad} x {nombre_producto.title()} - ${subtotal}")
+                                pedido_total.append((nombre_producto.title(), cantidad, encontrada['precio']))
+                                total_pago += subtotal
                         else:
                             print(f"No entendí el producto '{nombre_producto}', intenta de nuevo.")
                             break
@@ -233,6 +268,7 @@ def main():
                     if re.search(NEGACION_RE, continuar, re.IGNORECASE):
                         break
 
+                # Mostrar resumen
                 print("\nTu pedido completo es:")
                 for item, cant, precio in pedido_total:
                     print(f"- {cant} x {item} - ${precio * cant}")
@@ -242,10 +278,10 @@ def main():
                 # Generar número de pedido
                 numero_pedido = generarnumpedido()
                 print(f"\nTu numero de pedido es: {numero_pedido}")
-                print("Gracias por tu compra, Serás redirigido al area de cobro\n")
+                print("Gracias por tu compra, Serás redirigido al área de cobro\n")
                 state = 8
 
-         #AYUDA
+        #AYUDA
         if state == 12:
             print("\n=== Ayuda Papa John's ===")
             print("Puedes pedirme información sobre:")
