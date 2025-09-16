@@ -5,12 +5,11 @@ import time
 from datetime import datetime
 import random
 
-
 # -------------------------
 # Expresiones regulares
 # -------------------------
 # Promociones / cupones
-PROMO_RE = r"\b(promo(?:ciones)?|descuento(s)?|oferta(s)?|cup(o|ó)n(es)?)\b"
+PROMO_RE = r"\b(promo(?:ciones)?|descuento(s)?|oferta(s)?|cup(o|ón)n(es)?)\b"
 
 # Hacer pedido (intención general de ordenar)
 PEDIDO_RE = r"\b(pedir|orden(ar|ar)|quiero (una|la)? pizza|hacer un pedido|comprar pizza|me antoja (una )?pizza)\b"
@@ -46,7 +45,7 @@ LAST4_RE = r"^\d{4}$"
 # Afirmaciones / confirmaciones
 AFIRMACION_RE = r"\b(s[ií]|claro|por supuesto|correcto|perfecto|de acuerdo|ok|vale|sí por favor)\b"
 
-# Negaciones / correcciones       #También se puede agregar "quit(a|ar)"#
+# Negaciones / correcciones
 NEGACION_RE = r"\b(no|mejor no|cancela|cambiar|no es as[ií]|eso no|negar)\b"
 
 # Salir / terminar conversación
@@ -61,6 +60,29 @@ CONTACTO_RE = r"\b(?:contacto|comunica(?:r(?:se)?)?|hablar (?:con|a)? (?:alguien
 # Peticiones fuera de contexto
 EXTRA_RE = r"\b(escrib(e|ir))\b"
 
+# Finalizar pedido
+FINALIZAR_RE = r"\b(seria todo|es todo|finalizar|terminar pedido|eso es todo)\b"
+
+#Alcaldías 
+ALCALDIAS_RE = {
+    "miguel hidalgo": r"\b(miguel\s*hidalgo|polanco|lomas|anzures|granada)\b",
+    "benito juarez": r"\b(benito\s*juarez|del\s*valle|napoles|narvarte|portales)\b",
+    "cuauhtemoc": r"\b(cuauhtemoc|roma|condesa|centro|doctores|juarez)\b",
+    "alvaro obregon": r"\b(alvaro\s*obregon|san\s*angel|florida|olivar)\b",
+    "coyoacan": r"\b(coyoacan|pedregal|santo\s*domingo)\b",
+    "tlalpan": r"\b(tlalpan|perisur|fuentes\s*brotantes)\b",
+    "azcapotzalco": r"\b(azcapotzalco|san\s*martin|claveria)\b",
+    "gustavo a madero": r"\b(gustavo\s*a\s*madero|lindavista|tepeyac|guadalupe)\b",
+    "venustiano carranza": r"\b(venustiano\s*carranza|morelos|jardin\s*balbuena)\b",
+    "iztacalco": r"\b(iztacalco|agricola|viaducto)\b",
+    "iztapalapa": r"\b(iztapalapa|santa\s*cruz|cabeza\s*de\s*juarez)\b",
+    "la magdalena contreras": r"\b(magdalena\s*contreras|san\s*jeronimo)\b",
+    "milpa alta": r"\b(milpa\s*alta)\b",
+    "tlahuac": r"\b(tlahuac)\b",
+    "xochimilco": r"\b(xochimilco)\b"
+}
+
+# Menú con precios (versión mejorada del segundo archivo)
 regex_menu = {
     # --- PIZZAS ---
     r"hawaiana": {"descrip": "Hawaiana Pizza de jamón, piña y extra queso 100% Mozzarella.", "precio": 244},
@@ -69,7 +91,7 @@ regex_menu = {
     r"mexican[ao]": {"descrip": "Pizza con chorizo, carne de res, cebolla, jalapeños picositos y salsa de tomate con frijoles.", "precio": 244},
     r"caribeñ[ao]": {"descrip": "Pizza con piña y chile molido", "precio": 244},
     r"the\s*works": {"descrip": "The Works Pizza de pepperoni, salchicha italiana, jamón, champiñones, cebolla, pimiento verde y aceitunas negras", "precio": 284},
-    r"papas?\s*favorite": {"desc": "Papas Favorite Pizza con mezcla de 6 quesos (Mozzarella, Parmesano, Romano, Asiago, Fontina, Provolone), pepperoni, salchicha de cerdo", "precio": 284},
+    r"papas?\s*favorite": {"descrip": "Papas Favorite Pizza con mezcla de 6 quesos (Mozzarella, Parmesano, Romano, Asiago, Fontina, Provolone), pepperoni, salchicha de cerdo", "precio": 284},
     r"all\s*the\s*meats": {"descrip": "All The Meats Pizza con carnes frías: pepperoni, salchicha de puerco, carne de res, jamón y tocino", "precio": 284},
     r"pe+per?on+i\s*xl\s*masa\s*delgada": {"descrip": "Nuestra pizza Pepperoni XL es extra grande en sabor.", "precio": 324},
     r"arma\s*tu\s*pizza": {"descrip": "Elige el tamaño, la masa y luego añade tus ingredientes favoritos y nosotros la haremos por ti.", "precio": 129},
@@ -120,7 +142,129 @@ regex_menu = {
     r"peperoncini": {"descrip": "Peperoncini picantes para los valientes.", "precio": 18}
 }
 
+#sucursales por alcaldía
+SUCURSALES_CDMX = {
+    "miguel hidalgo": [
+        {
+            "nombre": "Papa John's Polanco",
+            "direccion": "Av. Presidente Masaryk 61, Polanco V Secc, 11560 Ciudad de México",
+            "telefono": "55-5280-1234",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        },
+        {
+            "nombre": "Papa John's Antara",
+            "direccion": "Av. Ejército Nacional 843, Granada, 11520 Ciudad de México",
+            "telefono": "55-5203-5678",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "benito juarez": [
+        {
+            "nombre": "Papa John's Del Valle",
+            "direccion": "Av. Insurgentes Sur 1235, Del Valle Centro, 03100 Ciudad de México",
+            "telefono": "55-5559-9012",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        },
+        {
+            "nombre": "Papa John's Nápoles",
+            "direccion": "Av. San Antonio 255, Nápoles, 03810 Ciudad de México",
+            "telefono": "55-5543-3456",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "cuauhtemoc": [
+        {
+            "nombre": "Papa John's Roma Norte",
+            "direccion": "Av. Álvaro Obregón 45, Roma Norte, 06700 Ciudad de México",
+            "telefono": "55-5207-7890",
+            "horario": "Lun-Dom: 11:00 AM - 12:00 AM"
+        },
+        {
+            "nombre": "Papa John's Centro",
+            "direccion": "República de Argentina 12, Centro Histórico, 06020 Ciudad de México",
+            "telefono": "55-5512-1234",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "alvaro obregon": [
+        {
+            "nombre": "Papa John's San Ángel",
+            "direccion": "Av. Revolución 1267, San Ángel, 01000 Ciudad de México",
+            "telefono": "55-5616-5678",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "coyoacan": [
+        {
+            "nombre": "Papa John's Coyoacán Centro",
+            "direccion": "Av. Miguel Ángel de Quevedo 687, Coyoacán, 04000 Ciudad de México",
+            "telefono": "55-5659-9012",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "tlalpan": [
+        {
+            "nombre": "Papa John's Perisur",
+            "direccion": "Anillo Periférico Sur 4690, Insurgentes Cuicuilco, 04530 Ciudad de México",
+            "telefono": "55-5573-3456",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ]
+}
+
+ALCALDIAS_SIN_SUCURSAL = {
+    "azcapotzalco": ["miguel hidalgo", "cuauhtemoc"],
+    "gustavo a madero": ["cuauhtemoc", "miguel hidalgo"],
+    "venustiano carranza": ["cuauhtemoc", "benito juarez"],
+    "iztacalco": ["benito juarez", "cuauhtemoc"],
+    "iztapalapa": ["benito juarez", "coyoacan"],
+    "la magdalena contreras": ["alvaro obregon", "tlalpan"],
+    "milpa alta": ["tlalpan", "coyoacan"],
+    "tlahuac": ["tlalpan", "coyoacan"],
+    "xochimilco": ["tlalpan", "coyoacan"]
+}
+
+def encontrar_alcaldia(texto):
+    """Encuentra la alcaldía mencionada en el texto"""
+    texto_lower = texto.lower().strip()
+    
+    for alcaldia, patron in ALCALDIAS_RE.items():
+        if re.search(patron, texto_lower, re.IGNORECASE):
+            return alcaldia
+    return None
+
+def mostrar_sucursales(alcaldia):
+    """Muestra las sucursales de una alcaldía específica"""
+    sucursales = SUCURSALES_CDMX.get(alcaldia, [])
+    
+    print(f"\n Sucursales de Papa John's en {alcaldia.title()}:")
+    print("=" * 50)
+    
+    for i, sucursal in enumerate(sucursales, 1):
+        print(f"\n{i}. {sucursal['nombre']}")
+        print(f"    {sucursal['direccion']}")
+        print(f"    {sucursal['telefono']}")
+        print(f"    {sucursal['horario']}")
+
+def mostrar_sucursales_cercanas(alcaldia):
+    """Muestra sucursales en alcaldías cercanas"""
+    alcaldias_cercanas = ALCALDIAS_SIN_SUCURSAL.get(alcaldia, [])
+    
+    print(f"\n No contamos con sucursales en {alcaldia.title()}")
+    print("Pero tenemos opciones cercanas para ti:")
+    print("=" * 50)
+    
+    for alcaldia_cercana in alcaldias_cercanas:
+        print(f"\n En {alcaldia_cercana.title()}:")
+        sucursales = SUCURSALES_CDMX.get(alcaldia_cercana, [])
+        
+        for sucursal in sucursales:
+            print(f"    {sucursal['nombre']}")
+            print(f"     {sucursal['direccion']}")
+            print(f"      {sucursal['telefono']}")
+
 def generarnumpedido():
+    """Genera un número único de pedido"""
     fecha = datetime.now().strftime("%Y%m%d%H%M%S")
     aleatorio = random.randint(10, 99)
     return f"PJ-{fecha}-{aleatorio}"
@@ -129,6 +273,8 @@ def main():
     state = 0
     Salida = 1
     name = ""  # para evitar referencia antes de asignación
+    pedido_global = []  # Para mantener el pedido entre estados
+    total_global = 0
 
     while Salida:
         if state == 0:
@@ -153,10 +299,6 @@ def main():
                 state = 7
             elif re.findall(VER_METODO_PAGO_RE, opcion, re.IGNORECASE):
                 state = 8
-            elif re.findall(AFIRMACION_RE, opcion, re.IGNORECASE):
-                state = 9
-            elif re.findall(NEGACION_RE, opcion, re.IGNORECASE):
-                state = 10
             elif re.findall(AYUDA_RE, opcion, re.IGNORECASE):
                 state = 12
             elif re.findall(CONTACTO_RE, opcion, re.IGNORECASE):
@@ -193,21 +335,37 @@ def main():
 
             if re.search(MENU_RE, respuesta, re.IGNORECASE):
                 state = 6
-
             elif re.search(PEDIDO_RE, respuesta, re.IGNORECASE):
-                pedido_total = []  # Guardaremos los artículos en este arreglo
+                pedido_total = []  # Inicializar pedido
                 total_pago = 0
-                print("Perfecto, empecemos con tu pedido de pizzas")
+                print("Perfecto, empecemos con tu pedido")
 
                 while True:
-                    pedido_linea = input(
-                        "Escribe tu pedido (puedes incluir cantidad y varios productos'): ").strip()
+                    pedido_linea = input("Escribe tu pedido (puedes incluir cantidad y varios productos): ").strip()
 
-                    if re.search(SALIR_RE, pedido_linea, re.IGNORECASE) or re.search(NEGACION_RE, pedido_linea,
-                                                                                     re.IGNORECASE):
+                    if re.search(SALIR_RE, pedido_linea, re.IGNORECASE):
                         break
 
-                    coincidencias = re.findall(r"(\d*)\s*([a-zA-Z0-9\sóñ&']+)", pedido_linea)
+                    if re.search(FINALIZAR_RE, pedido_linea, re.IGNORECASE):
+                        if pedido_total:
+                            print("\nTu pedido completo es:")
+                            for item, cant, precio in pedido_total:
+                                print(f"- {cant} x {item} - ${precio * cant}")
+                            print(f"\nTOTAL: ${total_pago}")
+                            
+                            numero_pedido = generarnumpedido()
+                            print(f"\nTu número de pedido es: {numero_pedido}")
+                            print("Gracias por tu compra. Serás redirigido al área de pago\n")
+                            state = 14  # Ir directamente al pago
+                            break
+                        else:
+                            print("No tienes productos en tu pedido aún.")
+                            continue
+
+                    # Procesar productos del pedido
+                    coincidencias = re.findall(r"(\d*)\s*([a-zA-ZÀ-ÿ0-9\s&']+)", pedido_linea)
+                    productos_agregados = False
+                    
                     for cantidad_str, nombre_producto in coincidencias:
                         cantidad = int(cantidad_str) if cantidad_str.isdigit() else 1
                         nombre_producto = nombre_producto.strip()
@@ -224,74 +382,129 @@ def main():
                             print(f"Agregado al pedido: {cantidad} x {nombre_producto.title()} - ${subtotal}")
                             pedido_total.append((nombre_producto.title(), cantidad, encontrada['precio']))
                             total_pago += subtotal
-                        else:
-                            print(f"No entendí el producto '{nombre_producto}', intenta de nuevo.")
-                            break
+                            productos_agregados = True
+                    
+                    if not productos_agregados:
+                        print("No entendí ningún producto. Intenta de nuevo o escribe 'finalizar' si terminaste.")
 
-                    # Preguntar si desea agregar más
-                    continuar = input("¿Deseas agregar más productos? (sí/no): ").strip()
-                    if re.search(NEGACION_RE, continuar, re.IGNORECASE):
+                    # Mostrar pedido actual si hay productos
+                    if pedido_total:
+                        print(f"\nPedido actual - Total: ${total_pago}")
+                        print("Escribe más productos, 'finalizar' para terminar, o 'salir' para cancelar.")
+
+        # --- IMPLEMENTACIÓN: Tipo de servicio (domicilio o recoger) ---
+        if state == 3:
+            print("¿Deseas que tu pedido sea a domicilio o prefieres recogerlo en sucursal?")
+            servicio_input = input("Escribe 'domicilio' o 'recoger' (o escribe 'salir' para cancelar): ").strip()
+            
+            if re.search(SALIR_RE, servicio_input, re.IGNORECASE):
+                state = 11
+            elif re.search(DOMICILIO_RE, servicio_input, re.IGNORECASE) or re.search(r"\bdomicilio\b", servicio_input, re.IGNORECASE):
+                print("Perfecto, procesaremos tu pedido para entrega a domicilio. 🚚")
+                state = 2
+            elif re.search(RECOGER_RE, servicio_input, re.IGNORECASE) or re.search(r"\brecoger\b", servicio_input, re.IGNORECASE):
+                while True:
+                    alcaldia_input = input("Indica la alcaldía donde te gustaría recoger (ej. Miguel Hidalgo) o escribe 'salir': ").strip()
+                    
+                    if re.search(SALIR_RE, alcaldia_input, re.IGNORECASE):
+                        state = 0
                         break
+                    
+                    alcaldia_encontrada = encontrar_alcaldia(alcaldia_input)
+                    
+                    if alcaldia_encontrada:
+                        if alcaldia_encontrada in SUCURSALES_CDMX:
+                            mostrar_sucursales(alcaldia_encontrada)
+                            suc_elegida = input("\nEscribe el número o nombre de la sucursal: ").strip()
+                            horario_recogida = input("¿En qué horario pasarás a recoger? (ej. 19:30): ").strip()
+                            print(f"✅ Pedido programado para recoger, horario: {horario_recogida}")
+                            state = 2
+                            break
+                        else:
+                            mostrar_sucursales_cercanas(alcaldia_encontrada)
+                            state = 2
+                            break
+                    else:
+                        print("No reconozco esa alcaldía. Intenta con una de las siguientes:")
+                        print("- Miguel Hidalgo, Benito Juárez, Cuauhtémoc, Álvaro Obregón")
+                        print("- Coyoacán, Tlalpan, Azcapotzalco, Gustavo A. Madero")
+                        print("- Venustiano Carranza, Iztacalco, Iztapalapa")
+                        print("- La Magdalena Contreras, Milpa Alta, Tláhuac, Xochimilco")
+            else:
+                print("No entendí tu opción. Escribe 'domicilio' o 'recoger'. Serás redirigido al menú principal.")
+                state = 0
 
-                print("\nTu pedido completo es:")
-                for item, cant, precio in pedido_total:
-                    print(f"- {cant} x {item} - ${precio * cant}")
-
-                print(f"\nTOTAL: ${total_pago}")
-
-                # Generar número de pedido
-                numero_pedido = generarnumpedido()
-                print(f"\nTu numero de pedido es: {numero_pedido}")
-                print("Gracias por tu compra, Serás redirigido al area de cobro\n")
-                state = 8
-
-         #AYUDA
-        if state == 12:
-            print("\n=== Ayuda Papa John's ===")
-            print("Puedes pedirme información sobre:")
-            print("- Promociones")
-            print("- Pedidos")
-            print("- Sucursales")
-            print("- Horarios")
-            print("- Menú")
-            print("- Estado de pedido")
-            print("- Contacto")
-            print("\nEjemplo de consulta: 'Quiero hacer un pedido' o 'Mostrar promociones'")
-
-            input("\nPresiona Enter para volver al menú principal...")
-            state = 0  # Regresamos al menú principal
-
-        #CONTACTO
-        if state == 13:
+        # Búsqueda de sucursales
+        if state == 4:
+            print("Para localizar tu tienda más cercana es necesario que indiques en qué alcaldía te encuentras")
             while True:
-                print("\n=== Soporte Papa John's ===")
-                print("1) Teléfonos y correo")
-                print("2) Queja o sugerencia")
-                print("3) Rastreo de pedido (simulado)")
-                print("Escribe 'menu' para volver al inicio.")
-
-                op = input("Elige una opción: ").strip().lower()
-
-                if op == "1":
-                     print("📞 800 111 11 11  |  ✉️ soporte@papajohns.com")
-                elif op == "2":
-                    detalle = input("Cuéntanos tu queja o sugerencia: ")
-                    print("Gracias, la canalizaremos a nuestro equipo.")
-                elif op == "3":
-                    pid = input("Ingresa tu ID de pedido: ")
-                    print(f"Pedido {pid}: en preparación (ejemplo).")
-                elif op == "menu":
-                    print("Regresando al menú principal.")
-                    state = 0
-                    break
-                elif re.search(SALIR_RE, op, re.IGNORECASE):
-                    print("¡Hasta luego!")
+                alcaldia_input = input("Escribe el nombre de tu alcaldía: ").strip()
+                
+                if re.search(SALIR_RE, alcaldia_input, re.IGNORECASE):
                     state = 11
                     break
+                
+                if re.search(NEGACION_RE, alcaldia_input, re.IGNORECASE):
+                    print("Serás redirigido al menú principal.")
+                    state = 0
+                    break
+                
+                alcaldia_encontrada = encontrar_alcaldia(alcaldia_input)
+                
+                if alcaldia_encontrada:
+                    if alcaldia_encontrada in SUCURSALES_CDMX:
+                        mostrar_sucursales(alcaldia_encontrada)
+                        
+                        while True:
+                            pedido_respuesta = input("\n¿Te gustaría hacer un pedido? (sí/no): ").strip()
+                            
+                            if re.search(SALIR_RE, pedido_respuesta, re.IGNORECASE):
+                                state = 11
+                                break
+                            
+                            if re.search(AFIRMACION_RE, pedido_respuesta, re.IGNORECASE):
+                                print("¡Perfecto! Te redirigimos a realizar tu pedido.")
+                                state = 2
+                                break
+                            
+                            if re.search(NEGACION_RE, pedido_respuesta, re.IGNORECASE):
+                                print("Está bien, serás redirigido al menú principal.")
+                                state = 0
+                                break
+                            
+                            print("Por favor responde 'sí' o 'no'.")
+                        break
+                    else:
+                        mostrar_sucursales_cercanas(alcaldia_encontrada)
+                        
+                        while True:
+                            continuar = input("\n¿Te interesa alguna de estas opciones? (sí/no): ").strip()
+                            
+                            if re.search(SALIR_RE, continuar, re.IGNORECASE):
+                                state = 11
+                                break
+                            
+                            if re.search(AFIRMACION_RE, continuar, re.IGNORECASE):
+                                print("¡Excelente! Te redirigimos para hacer tu pedido.")
+                                state = 2
+                                break
+                            
+                            if re.search(NEGACION_RE, continuar, re.IGNORECASE):
+                                print("Entendido, serás redirigido al menú principal.")
+                                state = 0
+                                break
+                            
+                            print("Por favor responde 'sí' o 'no'.")
+                        break
                 else:
-                    print("Opción no válida. Intenta de nuevo.")
-    
-        #Horarios de las sucursales
+                    print("No reconozco esa alcaldía. Por favor intenta con:")
+                    print("- Miguel Hidalgo, Benito Juárez, Cuauhtémoc, Álvaro Obregón")
+                    print("- Coyoacán, Tlalpan, Azcapotzalco, Gustavo A. Madero")
+                    print("- Venustiano Carranza, Iztacalco, Iztapalapa")
+                    print("- La Magdalena Contreras, Milpa Alta, Tláhuac, Xochimilco")
+                    print("\nO escribe 'salir' para terminar.")
+
+        # Horarios de las sucursales
         if state == 5:
             print("¡Claro! El horario de todas nuestras sucursales es el siguiente: \n"
             " - Lunes 11a.m. - 11p.m. \n"
@@ -301,29 +514,26 @@ def main():
             " - Viernes 11a.m. - 12a.m. \n"
             " - Sábado 11a.m. - 12a.m. \n"
             " - Domingo 11a.m. - 11p.m. \n")
+            
             while True:
-              sucursal = input("¿Quieres buscar una sucursal por tu zona? (sí/no): ").strip().lower()
+                sucursal = input("¿Quieres buscar una sucursal por tu zona? (sí/no): ").strip().lower()
 
-              # salir / finalizar
-              if re.search(SALIR_RE, sucursal, re.IGNORECASE):
-                  state = 11
-                  break
+                if re.search(SALIR_RE, sucursal, re.IGNORECASE):
+                    state = 11
+                    break
 
-              # afirmación -> ir a búsqueda de sucursal
-              if re.search(AFIRMACION_RE, sucursal, re.IGNORECASE):
-                  state = 4
-                  print("Para localizar tu tienda más cercana es necesario que indiques en qué alcadía te encuentras")
-                  break
+                if re.search(AFIRMACION_RE, sucursal, re.IGNORECASE):
+                    state = 4
+                    break
 
-              # negación -> volver al menú principal
-              if re.search(NEGACION_RE, sucursal, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
+                if re.search(NEGACION_RE, sucursal, re.IGNORECASE):
+                    print("Serás redirigido al menú principal.")
+                    state = 0
+                    break
 
-              # cualquier otra cosa -> volver a preguntar
-              print("Respuesta inválida. Escribe 'sí' o 'no'.")
+                print("Respuesta inválida. Escribe 'sí' o 'no'.")
 
+        # Menú
         if state == 6:
             print("Bienvenido al menú de Papa John's, espero encuentres lo que buscas \n"
                   " *Pizzas: \n"
@@ -378,18 +588,15 @@ def main():
                   "   - Dip Salsa BBQ\n"
                   "   - Dip Salsa de Ajo\n"
                   "   - Peperoncini\n"
+                  "Escribe el nombre del producto que deseas, o 'salir' para terminar.")
 
-                  "Escribe el nombre de la pizza que deseas, o 'salir' para terminar.")
-
-            while True:  # Mantenerse en el menú hasta que elija algo o salga
+            while True:
                 opcion_pizza = input("Tu elección: ").strip()
 
-                # Si el usuario llega a querer salir del menu
                 if re.search(SALIR_RE, opcion_pizza, re.IGNORECASE):
                     state = 11
                     break
 
-                # Buscar la pizza con las expresiones regulares
                 encontrada = None
                 for patron, info in regex_menu.items():
                     if re.search(patron, opcion_pizza, re.IGNORECASE):
@@ -400,23 +607,33 @@ def main():
                     print(f"{opcion_pizza.title()}")
                     print(f"Descripción: {encontrada['descrip']}")
                     print(f"Precio: ${encontrada['precio']}")
-                    pedido = input(
-                        "Te gustaria pasar a relizar tu pedido o te si gustas puedes seguir navegando por el menu \n")
+                    pedido = input("¿Te gustaría pasar a realizar tu pedido o seguir navegando por el menú? \n")
                     if re.search(MENU_RE, pedido, re.IGNORECASE):
-                        break
+                        continue
                     elif re.search(PEDIDO_RE, pedido, re.IGNORECASE):
-                        state = 2  # Redireccionamos al estado de pedido
+                        state = 2
                         break
-
                 else:
-                    print("No entendí tu elección. Intenta con el nombre de una pizza o 'salir'.")
+                    print("No entendí tu elección. Intenta con el nombre de un producto o 'salir'.")
 
-        #Métodos de pagos por si solo el cliente quiere saberlos
+        # Estado de pedido (simulado)
+        if state == 7:
+            pedido_id = input("Por favor proporciona tu número de pedido: ").strip()
+            if re.search(SALIR_RE, pedido_id, re.IGNORECASE):
+                state = 11
+            else:
+                estados = ["En preparación", "En el horno", "Listo para entrega", "En camino"]
+                estado_actual = random.choice(estados)
+                print(f"Tu pedido {pedido_id} está: {estado_actual}")
+                input("Presiona Enter para volver al menú principal...")
+                state = 0
+
+        # Métodos de pago (solo información)
         if state == 8:
             opcion = input("Nuestros métodos de pago disponibles son: \n"
                 "- Efectivo \n"
-                "- Tarjeta (American Express / Carnet / Mastercad / Visa) \n"
-                "- Trabajamos con los siguiente bancos: \n"
+                "- Tarjeta (American Express / Carnet / Mastercard / Visa) \n"
+                "- Trabajamos con los siguientes bancos: \n"
                 "  - AFIRME \t\t - Inbursa \n"
                 "  - Banco Azteca \t - Invex \n"
                 "  - Banorte \t\t - Ixe \n"
@@ -427,168 +644,144 @@ def main():
                 "¿Quisiera ordenar algo? \n"
             )
             if re.findall(SALIR_RE, opcion, re.IGNORECASE):
-              state = 11
+                state = 11
+            elif re.findall(AFIRMACION_RE, opcion, re.IGNORECASE):
+                state = 2
+            elif re.findall(NEGACION_RE, opcion, re.IGNORECASE):
+                print("Serás redirigido al menú principal.")
+                state = 0
 
-            if re.findall(AFIRMACION_RE, opcion, re.IGNORECASE):
-              state = 6
+        # Ayuda
+        if state == 12:
+            print("\n=== Ayuda Papa John's ===")
+            print("Puedes pedirme información sobre:")
+            print("- Promociones")
+            print("- Pedidos")
+            print("- Sucursales")
+            print("- Horarios")
+            print("- Menú")
+            print("- Estado de pedido")
+            print("- Contacto")
+            print("\nEjemplo de consulta: 'Quiero hacer un pedido' o 'Mostrar promociones'")
+            input("\nPresiona Enter para volver al menú principal...")
+            state = 0
 
-            if re.findall(NEGACION_RE, opcion, re.IGNORECASE):
-              print("Serás redirigido al menú principal.")
-              state = 0
+        # Contacto
+        if state == 13:
+            while True:
+                print("\n=== Soporte Papa John's ===")
+                print("1) Teléfonos y correo")
+                print("2) Queja o sugerencia")
+                print("3) Rastreo de pedido")
+                print("Escribe 'menu' para volver al inicio.")
 
-        #Métodos de pago que se le mostrarán al cliente cuando este apunto de pagar su orden
+                op = input("Elige una opción: ").strip().lower()
+
+                if op == "1":
+                    print("📞 800 111 11 11  |  ✉️ soporte@papajohns.com")
+                elif op == "2":
+                    detalle = input("Cuéntanos tu queja o sugerencia: ")
+                    print("Gracias, la canalizaremos a nuestro equipo.")
+                elif op == "3":
+                    pid = input("Ingresa tu ID de pedido: ")
+                    estados = ["En preparación", "En el horno", "Listo para entrega", "En camino"]
+                    print(f"Pedido {pid}: {random.choice(estados)}")
+                elif op == "menu":
+                    print("Regresando al menú principal.")
+                    state = 0
+                    break
+                elif re.search(SALIR_RE, op, re.IGNORECASE):
+                    print("¡Hasta luego!")
+                    state = 11
+                    break
+                else:
+                    print("Opción no válida. Intenta de nuevo.")
+
+        # Procesamiento de pago con tarjeta
         if state == 14:
             opcion = input("Nuestros métodos de pago disponibles son: \n"
                 "- Efectivo \n"
-                "- Tarjeta (American Express / Carnet / Mastercad / Visa) \n"
-                "- Trabajamos con los siguiente bancos: \n"
-                "  - AFIRME \t\t - Inbursa \n"
-                "  - Banco Azteca \t - Invex \n"
-                "  - Banorte \t\t - Ixe \n"
-                "  - BanRegio \t\t - Monex \n"
-                "  - BBVA \t\t - Santander \n"
-                "  - Citibanamex \t - Scotiabank \n"
-                "  - HSBC \n"
+                "- Tarjeta (American Express / Carnet / Mastercard / Visa) \n"
                 "¿Qué método de pago quiere usar, efectivo o tarjeta? \n"
             )
             if re.findall(SALIR_RE, opcion, re.IGNORECASE):
-              state = 11
+                state = 11
             elif re.findall(TARJETA_RE, opcion, re.IGNORECASE):
-              state = 14
-            else:
-              state = 15
+                print("Perfecto. Para pagos con tarjeta NO solicitamos datos sensibles.")
+                print("Por seguridad, solo recopilaremos: marca, titular, últimos 4 dígitos y vigencia.")
 
-        if state == 11:
-          print("¡Gracias! Fue un placer atenderte. 👋")
-          Salida = 0
-
-        if state == 14:
-            print("Perfecto. Para pagos con tarjeta NO solicitamos datos sensibles.")
-            print("Por seguridad, solo recopilaremos: marca de tarjeta, nombre del titular, últimos 4 dígitos y vigencia (MM/AA).")
-
-            # Marca
-            while True:
-                marca = input("Marca de la tarjeta (Visa / Mastercard / American Express / Carnet): ").strip().lower()
-                marca_normalizada = (
-                    "american express" if re.search(r"^(american\s*express|amex)$", marca) else
-                    "mastercard" if re.search(r"^master(card)?$", marca) else
-                    marca
-                )
-                if re.match(BRAND_RE, marca_normalizada):
-                    break
-                print("Marca no válida. Intente con: Visa, Mastercard, American Express o Carnet.")
-                if re.findall(SALIR_RE, marca, re.IGNORECASE):
-                  state = 11
-                  break
-                if re.search(NEGACION_RE, marca, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
-
-
-            # Nombre del titular
-            while True:
-                titular = input("Nombre del titular (como aparece en la tarjeta): ").strip()
-                if len(titular) >= 3:
-                    break
-                print("Ingrese un nombre válido (3+ caracteres).")
-                if re.findall(SALIR_RE, titular, re.IGNORECASE):
-                  state = 11
-                  break
-                if re.search(NEGACION_RE, titular, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
-
-            # Últimos 4 dígitos
-            while True:
-                ult4 = input("Ingresa SOLO los últimos 4 dígitos de la tarjeta: ").strip()
-                if re.match(LAST4_RE, ult4):
-                    break
-                print("Deben ser exactamente 4 dígitos.")
-                if re.findall(SALIR_RE, ult4, re.IGNORECASE):
-                  state = 11
-                  break
-                if re.search(NEGACION_RE, ult4, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
-
-            # Vigencia MM/AA
-            while True:
-                vigencia = input("Vigencia (MM/AA): ").strip()
-                if re.match(EXP_RE, vigencia):
-                    # Validación básica de fecha no expirada (opcional)
-                    try:
-                        mm, aa = vigencia.split("/")
-                        mm = int(mm)
-                        aa = int("20" + aa)  # asume 20AA
-                        ahora = datetime.now()
-                        # Considera válida si el último día del mes aún no pasó
-                        if (aa > ahora.year) or (aa == ahora.year and mm >= ahora.month):
-                            break
-                        else:
-                            print("La tarjeta parece estar vencida. Verifique la vigencia.")
-                    except Exception:
-                        print("Formato inválido. Use MM/AA (ej. 07/27).")
-                else:
-                    print("Número de mes inválido.")
-                if re.findall(SALIR_RE, vigencia, re.IGNORECASE):
-                  state = 11
-                  break
-                if re.search(NEGACION_RE, vigencia, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
-
-            print(f"\nDatos recibidos:")
-            print(f"- Marca: {marca_normalizada.title()}")
-            print(f"- Titular: {titular}")
-            print(f"- Terminación: **** {ult4}")
-            print(f"- Vigencia: {vigencia}")
-            print("El cobro se ha realizado correctamente, será redirigido al menú principal. ✅\n")
-            time.sleep(0.5)
-            state = 0
-
-        if state == 15:
-            necesita = input("¡Perfecto! ¿Necesitará cambio o pagará exacto? ").strip().lower()
-            if re.search(r"\b(cambio|sí|si|por favor|claro|ok|vale)\b", necesita):
+                # Marca
                 while True:
-                    para = input("¿Para cuánto (monto numérico)? ").strip().replace(",", "")
-                    try:
-                        monto = float(para)
-                        print(f"Anotado: se llevará cambio para ${monto:,.2f}. ✅\n")
+                    marca = input("Marca de la tarjeta (Visa/Mastercard/American Express/Carnet): ").strip().lower()
+                    marca_normalizada = (
+                        "american express" if re.search(r"^(american\s*express|amex)$", marca) else
+                        "mastercard" if re.search(r"^master(card)?$", marca) else
+                        marca
+                    )
+                    if re.match(BRAND_RE, marca_normalizada):
                         break
-                    except ValueError:
-                        print("Monto inválido. Intente de nuevo.")
+                    print("Marca no válida. Intente con: Visa, Mastercard, American Express o Carnet.")
+
+                # Titular
+                while True:
+                    titular = input("Nombre del titular: ").strip()
+                    if len(titular) >= 3:
+                        break
+                    print("Ingrese un nombre válido (3+ caracteres).")
+
+                # Últimos 4 dígitos
+                while True:
+                    ult4 = input("Últimos 4 dígitos: ").strip()
+                    if re.match(LAST4_RE, ult4):
+                        break
+                    print("Deben ser exactamente 4 dígitos.")
+
+                # Vigencia
+                while True:
+                    vigencia = input("Vigencia (MM/AA): ").strip()
+                    if re.match(EXP_RE, vigencia):
+                        break
+                    print("Formato inválido. Use MM/AA (ej. 07/27).")
+
+                print(f"\nPago procesado exitosamente")
+                print(f"- Marca: {marca_normalizada.title()}")
+                print(f"- Terminación: **** {ult4}")
+                print("¡Gracias por tu compra! ✅\n")
+                time.sleep(1)
+                state = 0
             else:
-                print("Perfecto, se registró pago exacto. ✅\n")
-            state = 0  # volver al menú principal
-            if re.findall(SALIR_RE, necesita, re.IGNORECASE):
-                  state = 11
-                  break
-            if re.search(NEGACION_RE, necesita, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
+                # Pago en efectivo
+                necesita = input("¿Necesitará cambio o pagará exacto? ").strip().lower()
+                if re.search(r"\b(cambio|sí|si|por favor)\b", necesita):
+                    while True:
+                        para = input("¿Para cuánto? ").strip().replace(",", "")
+                        try:
+                            monto = float(para)
+                            print(f"Anotado: cambio para ${monto:,.2f} ✅")
+                            break
+                        except ValueError:
+                            print("Monto inválido.")
+                else:
+                    print("Perfecto, pago exacto registrado ✅")
+                state = 0
 
-        # Caso default para cualquier otra petición
-        # Aún sin terminar
+        # Salir
+        if state == 11:
+            print("¡Gracias! Fue un placer atenderte. 👋")
+            Salida = 0
+
+        # Estado por defecto para consultas no reconocidas
         if state == 30:
-          if re.findall(EXTRA_RE, opcion, re.IGNORECASE):
-            print(f"Discupa, pero no soy capaz {opcion}")
-            print("¡Pero puedes preguntar acerca de pizzas!")
+            if re.findall(EXTRA_RE, opcion, re.IGNORECASE):
+                print(f"Disculpa, pero no soy capaz de hacer eso")
+                print("¡Pero puedes preguntar acerca de pizzas!")
+            else:
+                print("No entendí tu consulta. Puedo ayudarte con:")
+                print("- Promociones, pedidos, menú")
+                print("- Sucursales, horarios") 
+                print("- Estado de pedido, contacto")
+                print("Escribe 'ayuda' para más información.")
             state = 0
-          else:
-            print("Waos")
-            state = 0
-
-          ##print("Hmmm")
-          ##time.sleep(1)
-          ##print("Lo siento, no puedo ayudarte con eso")
-          ##print("Pero sí se trata de una de una pizza, entonces ¡soy el indicado! 🤗")
-
-
 
 if __name__ == "__main__":
     main()
