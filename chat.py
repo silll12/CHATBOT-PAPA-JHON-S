@@ -44,13 +44,13 @@ EXP_RE = r"^(0[1-9]|1[0-2])\/\d{2}$"   # MM/AA
 LAST4_RE = r"^\d{4}$"
 
 # Afirmaciones / confirmaciones
-AFIRMACION_RE = r"\b(s[ií]|claro|por supuesto|correcto|perfecto|de acuerdo|ok|vale|sí por favor)\b"
+AFIRMACION_RE = r"\b(s[ií]|claro|por supuesto|correcto|perfecto|de acuerdo|ok|vale|por favor|sim(o|ó)n(a)?|dale|camara|sobres|que se arme|a (h|w)uevo|sill(o|ó)n|(c|s)hi|yes|ye(h)?a(h)?|va|arre|fierro|sale|jalo|espl(e|é)ndido|aj(a|á)|a wiwi|smn|saimon)\b"
 
-# Negaciones / correcciones       #También se puede agregar "quit(a|ar)"#
-NEGACION_RE = r"\b(no|mejor no|cancela|cambiar|no es as[ií]|eso no|negar)\b"
+# Negaciones / correcciones
+NEGACION_RE = r"\b(no|mejor no|cancela|cambia(r)?|no es as[ií]|eso no|negar|quita(r)?|nel(son)?|ni (madres|mai(s|z)|malles)|chin|chale|ño|(h|b)ue(v|b)os|ah(i|í) vemos|te aviso|n(o|a)mbre|ahorita|no(up|pe)|ñao ñao|chingues)\b"
 
 # Salir / terminar conversación
-SALIR_RE = r"\b(salir|ad(i|í)os|gracias(,? ad(i|í)os)?|terminar|hasta luego|nos vemos)\b"
+SALIR_RE = r"\b(salir|ad(i|í)os|gracias(,? ad(i|í)os)?|terminar|hasta luego|nos vemos|bye)\b"
 
 # Ayuda
 AYUDA_RE = r"\b(ayuda|necesito ayuda|no entiendo|opciones|men(ú|u) de ayuda)\b"
@@ -59,7 +59,32 @@ AYUDA_RE = r"\b(ayuda|necesito ayuda|no entiendo|opciones|men(ú|u) de ayuda)\b"
 CONTACTO_RE = r"\b(?:contacto|comunica(?:r(?:se)?)?|hablar (?:con|a)? (?:alguien|un operador|un agente)|atenci(?:ó|o)n(?: al cliente)?|soporte|queja(?:s)?|reclamo(?:s)?|ayuda (?:humana|en vivo)|llamar)\b"
 
 # Peticiones fuera de contexto
-EXTRA_RE = r"\b(escrib(e|ir))\b"
+VERBO_RE = r"\b[a-zA-Záéíóúñ]+(?:ar|er|ir)\b"
+ACCION_RE = r"\b([a-zA-Záéíóúñ]+)\b"
+GROSERIA_RE = r"\b(put(a|o)|mames|nmms|chinga(o)?|l?ptm|zorra|puer(c|k)(a|o)|tamadre|verga|vrg|pinche|ch(u|ú)pal(a|o)|cabr(o|ó)n(a)?)\b"
+
+
+# Finalizar pedido
+FINALIZAR_RE = r"\b(seria todo|es todo|finalizar|terminar pedido|eso es todo)\b"
+
+# Alcaldías 
+ALCALDIAS_RE = {
+    "miguel hidalgo": r"\b(miguel\s*hidalgo|polanco|lomas|anzures|granada)\b",
+    "benito juarez": r"\b(benito\s*juarez|del\s*valle|napoles|narvarte|portales)\b",
+    "cuauhtemoc": r"\b(cuauhtemoc|roma|condesa|centro|doctores|juarez)\b",
+    "alvaro obregon": r"\b(alvaro\s*obregon|san\s*angel|florida|olivar)\b",
+    "coyoacan": r"\b(coyoacan|pedregal|santo\s*domingo)\b",
+    "tlalpan": r"\b(tlalpan|perisur|fuentes\s*brotantes)\b",
+    "azcapotzalco": r"\b(azcapotzalco|san\s*martin|claveria)\b",
+    "gustavo a madero": r"\b(gustavo\s*a\s*madero|lindavista|tepeyac|guadalupe)\b",
+    "venustiano carranza": r"\b(venustiano\s*carranza|morelos|jardin\s*balbuena)\b",
+    "iztacalco": r"\b(iztacalco|agricola|viaducto)\b",
+    "iztapalapa": r"\b(iztapalapa|santa\s*cruz|cabeza\s*de\s*juarez)\b",
+    "la magdalena contreras": r"\b(magdalena\s*contreras|san\s*jeronimo)\b",
+    "milpa alta": r"\b(milpa\s*alta)\b",
+    "tlahuac": r"\b(tlahuac)\b",
+    "xochimilco": r"\b(xochimilco)\b"
+}
 
 regex_menu = {
     # --- PIZZAS ---
@@ -127,6 +152,129 @@ regex_menu = {
     r"combo404": {"descrip": "Dos pizzas de especialidad masa delgada: Súper Pepperoni, Hawaiana, Mexicana, Tuscan Six Cheese, Vegetariana o Caribeña más un refresco de 2L: Coca Cola, Coca Light, Fanta, Sidral Mundet o Sprite", "precio": 404},
 }
 
+# Sucursales por alcaldía
+SUCURSALES_CDMX = {
+    "miguel hidalgo": [
+        {
+            "nombre": "Papa John's Polanco",
+            "direccion": "Av. Presidente Masaryk 61, Polanco V Secc, 11560 Ciudad de México",
+            "telefono": "55-5280-1234",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        },
+        {
+            "nombre": "Papa John's Antara",
+            "direccion": "Av. Ejército Nacional 843, Granada, 11520 Ciudad de México",
+            "telefono": "55-5203-5678",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "benito juarez": [
+        {
+            "nombre": "Papa John's Del Valle",
+            "direccion": "Av. Insurgentes Sur 1235, Del Valle Centro, 03100 Ciudad de México",
+            "telefono": "55-5559-9012",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        },
+        {
+            "nombre": "Papa John's Nápoles",
+            "direccion": "Av. San Antonio 255, Nápoles, 03810 Ciudad de México",
+            "telefono": "55-5543-3456",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "cuauhtemoc": [
+        {
+            "nombre": "Papa John's Roma Norte",
+            "direccion": "Av. Álvaro Obregón 45, Roma Norte, 06700 Ciudad de México",
+            "telefono": "55-5207-7890",
+            "horario": "Lun-Dom: 11:00 AM - 12:00 AM"
+        },
+        {
+            "nombre": "Papa John's Centro",
+            "direccion": "República de Argentina 12, Centro Histórico, 06020 Ciudad de México",
+            "telefono": "55-5512-1234",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "alvaro obregon": [
+        {
+            "nombre": "Papa John's San Ángel",
+            "direccion": "Av. Revolución 1267, San Ángel, 01000 Ciudad de México",
+            "telefono": "55-5616-5678",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "coyoacan": [
+        {
+            "nombre": "Papa John's Coyoacán Centro",
+            "direccion": "Av. Miguel Ángel de Quevedo 687, Coyoacán, 04000 Ciudad de México",
+            "telefono": "55-5659-9012",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ],
+    "tlalpan": [
+        {
+            "nombre": "Papa John's Perisur",
+            "direccion": "Anillo Periférico Sur 4690, Insurgentes Cuicuilco, 04530 Ciudad de México",
+            "telefono": "55-5573-3456",
+            "horario": "Lun-Dom: 11:00 AM - 11:00 PM"
+        }
+    ]
+    
+}
+
+ALCALDIAS_SIN_SUCURSAL = {
+    "azcapotzalco": ["miguel hidalgo", "cuauhtemoc"],
+    "gustavo a madero": ["cuauhtemoc", "miguel hidalgo"],
+    "venustiano carranza": ["cuauhtemoc", "benito juarez"],
+    "iztacalco": ["benito juarez", "cuauhtemoc"],
+    "iztapalapa": ["benito juarez", "coyoacan"],
+    "la magdalena contreras": ["alvaro obregon", "tlalpan"],
+    "milpa alta": ["tlalpan", "coyoacan"],
+    "tlahuac": ["tlalpan", "coyoacan"],
+    "xochimilco": ["tlalpan", "coyoacan"]
+
+}
+
+def encontrar_alcaldia(texto):
+    """Encuentra la alcaldía mencionada en el texto"""
+    texto_lower = texto.lower().strip()
+    
+    for alcaldia, patron in ALCALDIAS_RE.items():
+        if re.search(patron, texto_lower, re.IGNORECASE):
+            return alcaldia
+    return None
+
+def mostrar_sucursales(alcaldia):
+    """Muestra las sucursales de una alcaldía específica"""
+    sucursales = SUCURSALES_CDMX.get(alcaldia, [])
+    
+    print(f"\n Sucursales de Papa John's en {alcaldia.title()}:")
+    print("=" * 50)
+    
+    for i, sucursal in enumerate(sucursales, 1):
+        print(f"\n{i}. {sucursal['nombre']}")
+        print(f"   {sucursal['direccion']}")
+        print(f"   {sucursal['telefono']}")
+        print(f"   {sucursal['horario']}")
+
+def mostrar_sucursales_cercanas(alcaldia):
+    """Muestra sucursales en alcaldías cercanas"""
+    alcaldias_cercanas = ALCALDIAS_SIN_SUCURSAL.get(alcaldia, [])
+    
+    print(f"\n⚠ No contamos con sucursales en {alcaldia.title()}")
+    print("Pero tenemos opciones cercanas para ti:")
+    print("=" * 50)
+    
+    for alcaldia_cercana in alcaldias_cercanas:
+        print(f"\n En {alcaldia_cercana.title()}:")
+        sucursales = SUCURSALES_CDMX.get(alcaldia_cercana, [])
+        
+        for sucursal in sucursales:
+            print(f"   • {sucursal['nombre']}")
+            print(f"     {sucursal['direccion']}")
+            print(f"      {sucursal['telefono']}")
+
 def generarnumpedido():
     fecha = datetime.now().strftime("%Y%m%d%H%M%S")
     aleatorio = random.randint(10, 99)
@@ -136,10 +284,10 @@ def main():
     state = 0
     Salida = 1
     name = ""  # para evitar referencia antes de asignación
+    print("Hola soy el Chatbot de Papa John's ¿En qué te puedo ayudar?")
 
     while Salida:
         if state == 0:
-            print("Hola soy el Chatbot de Papa John's ¿En qué te puedo ayudar?")
             time.sleep(1)
             opcion = input("Soy capaz de informarte de nuestras promociones, ayudarte a ordenar pizza, encontrar sucursales, nuestros horarios, nuestro menús, estado de tu pedido, nuestros contactos. \n\t\t\t")
             if re.findall(PROMO_RE, opcion, re.IGNORECASE):
@@ -327,9 +475,52 @@ def main():
                 else:
                     print("Opción no válida. Intenta de nuevo.")
     
-        #Horarios de las sucursales
+        #Tipo de servicio 
+        if state == 3 :
+            print("¿Deseas que tu pedido sea a domicilio o prefieres recogerlo en sucursal?")
+            servicio_input = input ("Escribe 'domicilio'  o 'recoger' (o escribe 'salir' para cancelar): ").strip()
+
+            if re.search(SALIR_RE, servicio_input, re.IGNORECASE):
+                state = 11
+            elif re.search(DOMICILIO_RE, servicio_input, re.IGNORECASE) or re.search(r"\bdomicilio\b",servicio_input, re.IGNORECASE):
+                print("Perfecto, procesaremos tu pedido para entrega a domicilio")
+                state = 2
+            elif re.search(RECOGER_RE, servicio_input, re.IGNORECASE) or re.search(r"\brecoger\b", servicio_input, re.IGNORECASE):
+                while True:
+                    alcaldia_input = input("Indica la alcaldía donde te gustaría recoger (ej. Miguel Hidalgo) o escribe 'salir': ").strip()
+                    
+                    if re.search(SALIR_RE, alcaldia_input, re.IGNORECASE):
+                        state = 0
+                        break
+                    
+                    alcaldia_encontrada = encontrar_alcaldia(alcaldia_input)
+                    
+                    if alcaldia_encontrada:
+                        if alcaldia_encontrada in SUCURSALES_CDMX:
+                            mostrar_sucursales(alcaldia_encontrada)
+                            suc_elegida = input("\nEscribe el número o nombre de la sucursal: ").strip()
+                            horario_recogida = input("¿En qué horario pasarás a recoger? (ej. 19:30): ").strip()
+                            print(f"✅ Pedido programado para recoger, horario: {horario_recogida}")
+                            state = 2
+                            break
+                        else:
+                            mostrar_sucursales_cercanas(alcaldia_encontrada)
+                            state = 2
+                            break
+                    else:
+                        print("No reconozco esa alcaldía. Intenta con una de las siguientes:")
+                        print("- Miguel Hidalgo, Benito Juárez, Cuauhtémoc, Álvaro Obregón")
+                        print("- Coyoacán, Tlalpan, Azcapotzalco, Gustavo A. Madero")
+                        print("- Venustiano Carranza, Iztacalco, Iztapalapa")
+                        print("- La Magdalena Contreras, Milpa Alta, Tláhuac, Xochimilco")
+            else:
+                print("No entendí tu opción. Escribe 'domicilio' o 'recoger'. Serás redirigido al menú principal.")
+                state = 0
+
+
+        # Horarios de las sucursales
         if state == 5:
-            print("¡Claro! El horario de todas nuestras sucursales es el siguiente: \n"
+             print("¡Claro! El horario de todas nuestras sucursales es el siguiente: \n"
             " - Lunes 11a.m. - 11p.m. \n"
             " - Martes 11a.m. - 11p.m. \n"
             " - Miércoles 11a.m. - 11p.m. \n"
@@ -337,28 +528,69 @@ def main():
             " - Viernes 11a.m. - 12a.m. \n"
             " - Sábado 11a.m. - 12a.m. \n"
             " - Domingo 11a.m. - 11p.m. \n")
+
+    while True:
+        sucursal = input("¿Quieres buscar una sucursal por tu zona? (sí/no): ").strip().lower()
+
+        # salir / finalizar
+        if re.search(SALIR_RE, sucursal, re.IGNORECASE):
+            state = 11
+            break
+
+        # afirmación -> ir a búsqueda de sucursal
+        if re.search(AFIRMACION_RE, sucursal, re.IGNORECASE):
+            state = 4
+            print("Para localizar tu tienda más cercana es necesario que indiques en qué alcaldía te encuentras")
+
             while True:
-              sucursal = input("¿Quieres buscar una sucursal por tu zona? (sí/no): ").strip().lower()
+                alcaldia_input = input("Escribe el nombre de tu alcaldía: ").strip()
 
-              # salir / finalizar
-              if re.search(SALIR_RE, sucursal, re.IGNORECASE):
-                  state = 11
-                  break
+                if re.search(SALIR_RE, alcaldia_input, re.IGNORECASE):
+                    state = 11
+                    break
 
-              # afirmación -> ir a búsqueda de sucursal
-              if re.search(AFIRMACION_RE, sucursal, re.IGNORECASE):
-                  state = 4
-                  print("Para localizar tu tienda más cercana es necesario que indiques en qué alcadía te encuentras")
-                  break
+                alcaldia_encontrada = encontrar_alcaldia(alcaldia_input)
 
-              # negación -> volver al menú principal
-              if re.search(NEGACION_RE, sucursal, re.IGNORECASE):
-                  print("Serás redirigido al menú principal.")
-                  state = 0
-                  break
+                if alcaldia_encontrada in SUCURSALES_CDMX:
+                    mostrar_sucursales(alcaldia_encontrada)
 
-              # cualquier otra cosa -> volver a preguntar
-              print("Respuesta inválida. Escribe 'sí' o 'no'.")
+                    while True:
+                        pedido_respuesta = input("\n¿Te gustaría hacer un pedido? (sí/no): ").strip()
+
+                        if re.search(SALIR_RE, pedido_respuesta, re.IGNORECASE):
+                            state = 11
+                            break
+
+                        if re.search(AFIRMACION_RE, pedido_respuesta, re.IGNORECASE):
+                            print("¡Perfecto! Te redirigimos a realizar tu pedido.")
+                            state = 2
+                            break
+
+                        if re.search(NEGACION_RE, pedido_respuesta, re.IGNORECASE):
+                            print("Está bien, serás redirigido al menú principal.")
+                            state = 0
+                            break
+
+                        print("Por favor responde 'sí' o 'no'.")
+
+                else:
+                    mostrar_sucursales_cercanas(alcaldia_encontrada)
+                    print("No reconozco esa alcaldía. Por favor intenta con:")
+                    print("- Miguel Hidalgo, Benito Juárez, Cuauhtémoc, Álvaro Obregón")
+                    print("- Coyoacán, Tlalpan, Azcapotzalco, Gustavo A. Madero")
+                    print("- Venustiano Carranza, Iztacalco, Iztapalapa")
+                    print("- La Magdalena Contreras, Milpa Alta, Tláhuac, Xochimilco")
+                    print("\nO escribe 'salir' para terminar.")
+
+        # negación -> volver al menú principal
+        elif re.search(NEGACION_RE, sucursal, re.IGNORECASE):
+            print("Serás redirigido al menú principal.")
+            state = 0
+            break
+
+        else:
+            print("Respuesta inválida. Escribe 'sí' o 'no'.")
+
 
         if state == 6:
             print("Bienvenido al menú de Papa John's, espero encuentres lo que buscas \n"
@@ -608,21 +840,49 @@ def main():
                   state = 0
                   break
 
-        # Caso default para cualquier otra petición
-        # Aún sin terminar
-        if state == 30:
-          if re.findall(EXTRA_RE, opcion, re.IGNORECASE):
-            print(f"Discupa, pero no soy capaz {opcion}")
-            print("¡Pero puedes preguntar acerca de pizzas!")
-            state = 0
-          else:
-            print("Waos")
+        
+        ## Caso para cuando comienza escribiendo una afirmación o negación.
+        if state == 9:
+            print("¿Sí a cual de todas las opciones? 🤔")
             state = 0
 
+<<<<<<< HEAD
           ##print("Hmmm")
           ##time.sleep(1)
           ##print("Lo siento, no puedo ayudarte con eso")
           ##print("Pero sí se trata de una de una pizza, entonces ¡soy el indicado! 🤗")
+          ##cambios
+=======
+        if state == 10:
+            print("¿No qué padrino? 🤡")
+            state = 0
+
+
+        ## Caso default para cualquier otra petición.
+        if state == 30:
+          # Buscamos groserías
+          if re.findall(GROSERIA_RE, opcion, re.IGNORECASE):
+                #palabrota = re.findall(GROCERIA_RE, opcion, re.IGNORECASE)
+                print("Tienes un léxico interesante 😳")
+                time.sleep(1)
+                state = 0
+          # Buscamos verbos en infinitivo
+          if re.findall(VERBO_RE, opcion, re.IGNORECASE):
+            verbos = re.findall(VERBO_RE, opcion, re.IGNORECASE)
+            verbo = verbos[0]
+            print(f"Discupa, no puedo {verbo} para tí, pero sí puedo brindarte información sobre nuestros servicios 😁")        
+            time.sleep(1)
+            state = 0
+          elif re.findall(ACCION_RE, opcion, re.IGNORECASE):
+            # Para cualquier otra consulta fuera de contexto
+            print(f"No puedo ayudarte con eso, pero sí puedo ayudarte a pedir una pizza 😋")
+            time.sleep(1)
+            state = 0
+          else: # Para mensajes con caracteres especiales
+            print("Por favor realiza una consulta legible y válida.")
+            time.sleep(2)
+            state = 0
+>>>>>>> 6264e99fd6e7a480af6b0992513b48b4d0501dcc
 
 
 
