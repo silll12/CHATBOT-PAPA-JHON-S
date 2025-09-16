@@ -44,13 +44,13 @@ EXP_RE = r"^(0[1-9]|1[0-2])\/\d{2}$"   # MM/AA
 LAST4_RE = r"^\d{4}$"
 
 # Afirmaciones / confirmaciones
-AFIRMACION_RE = r"\b(s[ií]|claro|por supuesto|correcto|perfecto|de acuerdo|ok|vale|sí por favor)\b"
+AFIRMACION_RE = r"\b(s[ií]|claro|por supuesto|correcto|perfecto|de acuerdo|ok|vale|por favor|sim(o|ó)n(a)?|dale|camara|sobres|que se arme|a (h|w)uevo|sill(o|ó)n|(c|s)hi|yes|ye(h)?a(h)?|va|arre|fierro|sale|jalo|espl(e|é)ndido|aj(a|á)|a wiwi|smn|saimon)\b"
 
-# Negaciones / correcciones       #También se puede agregar "quit(a|ar)"#
-NEGACION_RE = r"\b(no|mejor no|cancela|cambiar|no es as[ií]|eso no|negar)\b"
+# Negaciones / correcciones
+NEGACION_RE = r"\b(no|mejor no|cancela|cambia(r)?|no es as[ií]|eso no|negar|quita(r)?|nel(son)?|ni (madres|mai(s|z)|malles)|chin|chale|ño|(h|b)ue(v|b)os|ah(i|í) vemos|te aviso|n(o|a)mbre|ahorita|no(up|pe)|ñao ñao|chingues)\b"
 
 # Salir / terminar conversación
-SALIR_RE = r"\b(salir|ad(i|í)os|gracias(,? ad(i|í)os)?|terminar|hasta luego|nos vemos)\b"
+SALIR_RE = r"\b(salir|ad(i|í)os|gracias(,? ad(i|í)os)?|terminar|hasta luego|nos vemos|bye)\b"
 
 # Ayuda
 AYUDA_RE = r"\b(ayuda|necesito ayuda|no entiendo|opciones|men(ú|u) de ayuda)\b"
@@ -59,7 +59,10 @@ AYUDA_RE = r"\b(ayuda|necesito ayuda|no entiendo|opciones|men(ú|u) de ayuda)\b"
 CONTACTO_RE = r"\b(?:contacto|comunica(?:r(?:se)?)?|hablar (?:con|a)? (?:alguien|un operador|un agente)|atenci(?:ó|o)n(?: al cliente)?|soporte|queja(?:s)?|reclamo(?:s)?|ayuda (?:humana|en vivo)|llamar)\b"
 
 # Peticiones fuera de contexto
-EXTRA_RE = r"\b(escrib(e|ir))\b"
+VERBO_RE = r"\b[a-zA-Záéíóúñ]+(?:ar|er|ir)\b"
+ACCION_RE = r"\b([a-zA-Záéíóúñ]+)\b"
+GROSERIA_RE = r"\b(put(a|o)|mames|nmms|chinga(o)?|l?ptm|zorra|puer(c|k)(a|o)|tamadre|verga|vrg|pinche|ch(u|ú)pal(a|o)|cabr(o|ó)n(a)?)\b"
+
 
 regex_menu = {
     # --- PIZZAS ---
@@ -129,10 +132,10 @@ def main():
     state = 0
     Salida = 1
     name = ""  # para evitar referencia antes de asignación
+    print("Hola soy el Chatbot de Papa John's ¿En qué te puedo ayudar?")
 
     while Salida:
         if state == 0:
-            print("Hola soy el Chatbot de Papa John's ¿En qué te puedo ayudar?")
             time.sleep(1)
             opcion = input("Soy capaz de informarte de nuestras promociones, ayudarte a ordenar pizza, encontrar sucursales, nuestros horarios, nuestro menús, estado de tu pedido, nuestros contactos. \n\t\t\t")
             if re.findall(PROMO_RE, opcion, re.IGNORECASE):
@@ -572,21 +575,41 @@ def main():
                   state = 0
                   break
 
-        # Caso default para cualquier otra petición
-        # Aún sin terminar
-        if state == 30:
-          if re.findall(EXTRA_RE, opcion, re.IGNORECASE):
-            print(f"Discupa, pero no soy capaz {opcion}")
-            print("¡Pero puedes preguntar acerca de pizzas!")
-            state = 0
-          else:
-            print("Waos")
+        
+        ## Caso para cuando comienza escribiendo una afirmación o negación.
+        if state == 9:
+            print("¿Sí a cual de todas las opciones? 🤔")
             state = 0
 
-          ##print("Hmmm")
-          ##time.sleep(1)
-          ##print("Lo siento, no puedo ayudarte con eso")
-          ##print("Pero sí se trata de una de una pizza, entonces ¡soy el indicado! 🤗")
+        if state == 10:
+            print("¿No qué padrino? 🤡")
+            state = 0
+
+
+        ## Caso default para cualquier otra petición.
+        if state == 30:
+          # Buscamos groserías
+          if re.findall(GROSERIA_RE, opcion, re.IGNORECASE):
+                #palabrota = re.findall(GROCERIA_RE, opcion, re.IGNORECASE)
+                print("Tienes un léxico interesante 😳")
+                time.sleep(1)
+                state = 0
+          # Buscamos verbos en infinitivo
+          if re.findall(VERBO_RE, opcion, re.IGNORECASE):
+            verbos = re.findall(VERBO_RE, opcion, re.IGNORECASE)
+            verbo = verbos[0]
+            print(f"Discupa, no puedo {verbo} para tí, pero sí puedo brindarte información sobre nuestros servicios 😁")        
+            time.sleep(1)
+            state = 0
+          elif re.findall(ACCION_RE, opcion, re.IGNORECASE):
+            # Para cualquier otra consulta fuera de contexto
+            print(f"No puedo ayudarte con eso, pero sí puedo ayudarte a pedir una pizza 😋")
+            time.sleep(1)
+            state = 0
+          else: # Para mensajes con caracteres especiales
+            print("Por favor realiza una consulta legible y válida.")
+            time.sleep(2)
+            state = 0
 
 
 
