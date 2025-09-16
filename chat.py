@@ -64,7 +64,7 @@ EXTRA_RE = r"\b(escrib(e|ir))\b"
 # Finalizar pedido
 FINALIZAR_RE = r"\b(seria todo|es todo|finalizar|terminar pedido|eso es todo)\b"
 
-#Alcaldías 
+# Alcaldías 
 ALCALDIAS_RE = {
     "miguel hidalgo": r"\b(miguel\s*hidalgo|polanco|lomas|anzures|granada)\b",
     "benito juarez": r"\b(benito\s*juarez|del\s*valle|napoles|narvarte|portales)\b",
@@ -142,7 +142,7 @@ regex_menu = {
     r"peperoncini": {"descrip": "Peperoncini picantes para los valientes.", "precio": 18}
 }
 
-#sucursales por alcaldía
+# Sucursales por alcaldía
 SUCURSALES_CDMX = {
     "miguel hidalgo": [
         {
